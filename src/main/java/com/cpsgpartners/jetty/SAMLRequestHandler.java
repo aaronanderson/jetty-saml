@@ -186,7 +186,11 @@ public class SAMLRequestHandler implements RequestHandler {
         } catch (XMLStreamException xe) {
             throw new IOException(xe);
         }
-        String relayState = request.getRequestURL().toString();
+        StringBuffer requestURL = request.getRequestURL();
+        if (request.getQueryString() != null) {
+            requestURL.append("?").append(request.getQueryString());
+        }
+        String relayState = requestURL.toString();
         relayState = URLEncoder.encode(relayState, "UTF-8");
         String strRequest = null;
         SAMLBinding binding = null;

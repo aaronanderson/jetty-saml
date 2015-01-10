@@ -1,0 +1,19 @@
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+<!-- This can be configured per-webapp as well http://www.eclipse.org/jetty/documentation/current/configuring-security-authentication.html#d0e5471 -->
+<Configure class="org.eclipse.jetty.webapp.WebAppContext">
+	<Set name="serverClasses">
+		<Array type="java.lang.String">
+			<Item>-org.eclipse.jetty.servlet.ServletContextHandler.Decorator</Item>
+		</Array>
+	</Set>
+
+	<Get name="securityHandler">
+		<Set name="loginService">
+			<Get id="SamlLoginService" class="com.cpsgpartners.jetty.SAMLLoginService" name="globalInstance" />
+		</Set>
+		<Set name="authenticator">
+			<Get id="SamlAuthenticator" class="com.cpsgpartners.jetty.SAMLAuthenticator" name="globalInstance" />
+		</Set>
+	</Get>
+</Configure>
+

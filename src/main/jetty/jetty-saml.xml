@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">
+ 
+<!-- ============================================================= -->
+<!-- Configure the SAML Context Place holder                       -->
+<!-- ============================================================= -->
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+
+
+	<!-- Server-wide instances -->
+
+	<Get id="SamlLoginService" class="com.cpsgpartners.jetty.SAMLLoginService" name="globalInstance">
+
+	</Get>
+
+	<Get id="SamlAuthenticator" class="com.cpsgpartners.jetty.SAMLAuthenticator" name="globalInstance">
+		<Set name="logoutURI">/logout</Set>
+		<Set name="metadataURI">/metadata</Set>
+		<Set name="metadataPath">
+			<Property name="jetty.base" default="." />/<Property name="jetty.saml.keystore" default="target/jetty/metadata.xml" />
+		</Set>
+		<Set name="requestHandler">
+			<New class="com.cpsgpartners.jetty.SAMLRequestHandler">
+<!-- <Set name="issuer">http://localhost:8080/intcentral/</Set>
+<Set name="assertionConsumerServiceUrl">http://localhost:8080/intcentral/</Set>
+ -->
+				<Set name="issuer">http://localhost:8080/saml/</Set>
+				<Set name="assertionConsumerServiceUrl">http://localhost:8080/saml/</Set>
+				<Set name="idpURL">https://login.windows.net/55555555-5555-5555-5555-555555555555/saml2</Set>
+				<Set name="nameIdFormat">urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</Set>
+				<Set name="keyStorePassword">
+					<Property name="jetty.keystore.password" default="samlsp" />
+				</Set>
+				<Set name="keyStorePath">
+					<Property name="jetty.base" default="." />/<Property name="jetty.saml.keystore" default="target/jetty/saml.p12" />
+				</Set>
+			</New>
+		</Set>
+		<Set name="responseHandler">
+			<New class="com.cpsgpartners.jetty.SAMLResponseHandler">
+				<Set name="certificate">MIIDPjCCAiqgA..BASE64.Encoded.Signing.Certificate.Goes.Here==</Set>
+			</New>
+		</Set>
+	</Get>	
+
+	<Set name="handler">
+		<New id="Handlers" class="org.eclipse.jetty.server.handler.HandlerCollection">
+			<Set name="handlers">
+				<Array type="org.eclipse.jetty.server.Handler">
+					<Item>
+						<New id="Contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection">
+							<Call name="addHandler">
+								<Arg>
+									<New class="org.eclipse.jetty.servlet.ServletContextHandler">
+										<Arg></Arg>
+										<Arg>/saml</Arg>
+										<Arg type="boolean">True</Arg>
+										<Arg type="boolean">true</Arg>
+										<Call name="addServlet">
+											<Arg>com.cpsgpartners.jetty.SAMLServlet</Arg>
+											<Arg>/*</Arg>
+										</Call>
+										<Get name="securityHandler">
+											<Set name="loginService">
+												<Ref refid="SamlLoginService" />
+											</Set>
+											<Set name="authenticator">
+												<Ref refid="SamlAuthenticator" />
+											</Set>
+											<Call name="addConstraintMapping">
+												<Arg>
+													<New class="org.eclipse.jetty.security.ConstraintMapping">
+														<!-- <Set name="method">POST</Set> -->
+														<Set name="pathSpec">/*</Set>
+														<Set name="constraint">
+															<New class="org.eclipse.jetty.util.security.Constraint">
+																<Set name="authenticate">true</Set>
+																<Set name="name">Protected Resources</Set>
+																<Set name="roles">
+																	<Array type="java.lang.String">
+																		<Item>**</Item>
+																	</Array>
+																</Set>
+															</New>
+														</Set>
+													</New>
+												</Arg>
+											</Call>
+										</Get>
+									</New>
+								</Arg>
+							</Call>
+						</New>
+					</Item>
+
+				</Array>
+			</Set>
+		</New>
+	</Set>
+
+
+</Configure>
